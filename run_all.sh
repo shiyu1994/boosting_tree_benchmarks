@@ -9,3 +9,9 @@ cd xgboost
 ./test_speed.sh
 ./test_accuracy.sh
 cd ..
+
+cd catboost
+./build.sh
+./test_speed.sh
+./test_accuracy.sh
+cd ..

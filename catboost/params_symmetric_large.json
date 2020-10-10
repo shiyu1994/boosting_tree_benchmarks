@@ -1,0 +1,10 @@
+{
+    "thread_count": 16,
+    "border_count":255,
+    "iterations": 500,
+    "learning_rate":0.02,
+    "grow_policy":"SymmetricTree",
+    "boosting_type":"Ordered",
+    "max_depth":8,
+    "min_data_in_leaf":400
+}

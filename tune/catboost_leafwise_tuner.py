@@ -79,7 +79,7 @@ class CatBoostTuner(Tuner):
         else:
             return None
 
-    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None):
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None, early_stopping_rounds=None):
         prefix = ""
         if self.data_format == "libsvm":
             prefix = self.data_format + "://"
@@ -92,7 +92,7 @@ class CatBoostTuner(Tuner):
         self.fullfill_parameters(params, seed)
         print("eval with params " + str(params))
         cat_booster = cat.CatBoost(params=params)
-        cat_booster.fit(train_data, eval_set=[test_data], verbose=1)
+        cat_booster.fit(train_data, eval_set=[test_data], verbose=1, early_stopping_rounds=early_stopping_rounds)
         eval_results = cat_booster.get_evals_result()
         results = eval_results["validation"][self.metric]
         train_data = None

@@ -1,6 +1,6 @@
 import numpy as np
 
-data_list = ["adult", "amazon", "appetency", "click", "internet", "kick", "upselling", "nips_b", "nips_c"]
+data_list = ["adult", "amazon", "appetency", "click", "internet", "kick", "upselling", "nips_b", "nips_c", "higgs", "yahoo", "msltr", "dataexpo_onehot", "allstate", "year"]
 dir_path = "simplified_data"
 
 def calc_count():

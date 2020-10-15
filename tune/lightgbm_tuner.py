@@ -70,7 +70,7 @@ class LightGBMTuner(Tuner):
         if "max_cat_threshold" in params:
             params["max_cat_threshold"] = int(params["max_cat_threshold"])
 
-    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None):
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None, early_stopping_rounds=None):
         if train_query_fname is not None:
             assert test_query_fname is not None
             train_group = np.genfromtxt(train_query_fname, delimiter=",", dtype=np.int)
@@ -84,7 +84,7 @@ class LightGBMTuner(Tuner):
         self.fullfill_parameters(params, seed)
         print("eval with params " + str(params))
         lgb_booster = lgb.train(params, train_data, valid_sets=[test_data], valid_names=["test"], evals_result=eval_results,
-            categorical_feature=self.categorical_features, keep_training_booster=True)
+            categorical_feature=self.categorical_features, keep_training_booster=True, early_stopping_rounds=early_stopping_rounds)
         for key in eval_results:
             print("key=", key)
         if "ndcg_eval_at" in params:

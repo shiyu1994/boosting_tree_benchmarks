@@ -54,7 +54,7 @@ class XGBoostTuner(Tuner):
             "seed":seed
         })
 
-    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None):
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None, early_stopping_rounds=None):
         train_data = xgb.DMatrix(train_file, feature_names=["{}".format(i) for i in range(self.num_features)])
         test_data = xgb.DMatrix(test_file, feature_names=["{}".format(i) for i in range(self.num_features)])
         if train_query_fname is not None:
@@ -67,7 +67,7 @@ class XGBoostTuner(Tuner):
         self.fullfill_parameters(params, seed)
         print("eval with params " + str(params))
         xgb_booster = xgb.train(params=params, dtrain=train_data, evals=[(test_data, "test")],\
-            evals_result=eval_results, num_boost_round=self.num_trees)
+            evals_result=eval_results, num_boost_round=self.num_trees, early_stopping_rounds=early_stopping_rounds)
         results = eval_results["test"][self.metric]
         train_data = None
         test_data = None

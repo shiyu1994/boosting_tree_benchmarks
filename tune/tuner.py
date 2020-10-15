@@ -30,6 +30,8 @@ class Tuner:
                 if feat_type == "Categ":
                     self.categorical_features += [fid]
                 self.num_features += 1
+        with open(self.time_log_fname, "w") as _:
+            pass
             
         if not os.path.exists(work_dir):
             os.system("mkdir {}".format(work_dir))
@@ -127,7 +129,7 @@ class Tuner:
         status = hpt.STATUS_OK
         for train_file, test_file, train_query_file, test_query_file in zip(train_files, test_files, train_query_files, test_query_files):
             try:
-                _, eval_score = self.eval(params, train_file, test_file, seed, train_query_file, test_query_file)
+                _, eval_score = self.eval(params, train_file, test_file, seed, train_query_file, test_query_file, early_stopping_rounds=50)
                 eval_scores.append(eval_score)
             except Exception as err:
                 print("failed at params " + str(params))
@@ -208,19 +210,21 @@ class Tuner:
             best_params = self.trials.best_trial["result"]["params"]
             print("best_params", best_params)
             best_iter = self.trials.best_trial["result"]["best_iter"]
-            test_scores = []
             for seed in range(self.n_seed):
-                _, test_score = self.eval(best_params, self.train_fname, self.test_fname, seed=seed,\
-                    train_query_fname=self.train_query_fname, test_query_fname=self.test_query_fname)
-                test_scores.append(test_score)
+                try:
+                    _, test_score = self.eval(best_params, self.train_fname, self.test_fname, seed=seed,\
+                        train_query_fname=self.train_query_fname, test_query_fname=self.test_query_fname)
+                except:
+                    print("exception when evaluation")
+                    best_iter = len(test_score) - 1
                 all_test_scores.append(test_score[best_iter])
-            mean_test_score = np.mean(test_scores, axis=0)
-            var_test_score = np.var(test_scores, axis=0)
+            mean_test_score = np.mean(all_test_scores)
+            var_test_score = np.var(all_test_scores)
             print(var_test_score)
-            print("test mean auc: %f, standard variance: %f, iteration: %d" % (mean_test_score[best_iter], np.sqrt(var_test_score[best_iter]), best_iter))
+            print("test mean auc: %f, standard variance: %f, iteration: %d" % (mean_test_score, np.sqrt(var_test_score), best_iter))
             print("param " + str(best_params))
-            mean_test_scores += [mean_test_score[best_iter]]
-            var_test_scores += [var_test_score[best_iter]]
+            mean_test_scores += [mean_test_score]
+            var_test_scores += [var_test_score]
         all_mean_by_group = np.mean(mean_test_scores)
         all_var_by_group = np.mean(var_test_scores)
         all_mean = np.mean(all_test_scores)

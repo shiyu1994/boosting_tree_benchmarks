@@ -40,7 +40,7 @@ class LightGBMTuner(Tuner):
                         max_cat_count = cat_count
             param_dict["cat_smooth"] = hp.qloguniform('cat_smooth', 0, 8, 1)
             param_dict["cat_l2"] = hp.qloguniform('cat_l2', 0, 6, 1)
-            param_dict["max_cat_threshold"] = hp.randint('max_cat_threshold', max_cat_count // 2 + 1)
+            param_dict["max_cat_threshold"] = hp.randint('max_cat_threshold', max_cat_count // 2) + 1
         self.param_space = param_dict
         self.metric = None
 

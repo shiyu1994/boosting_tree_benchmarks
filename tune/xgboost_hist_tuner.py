@@ -58,8 +58,8 @@ class XGBoostTuner(Tuner):
         params["max_leaves"] = int(params["max_leaves"])
 
     def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None, early_stopping_rounds=None):
-        train_data = xgb.DMatrix(train_file, feature_names=["{}".format(i) for i in range(self.num_features)])
-        test_data = xgb.DMatrix(test_file, feature_names=["{}".format(i) for i in range(self.num_features)])
+        train_data = xgb.DMatrix(train_file)
+        test_data = xgb.DMatrix(test_file)
         if train_query_fname is not None:
             assert test_query_fname is not None
             train_group = np.genfromtxt(train_query_fname, delimiter=",", dtype=np.int)

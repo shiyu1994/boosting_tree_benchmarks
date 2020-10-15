@@ -19,7 +19,6 @@ class Tuner:
         self.start_time = None
         self.test_time = 0.0
         self.time_tag = 0.0
-        self.num_features = 0
         self.categorical_features = []
         self.train_query_fname = train_query_fname
         self.test_query_fname = test_query_fname
@@ -29,7 +28,6 @@ class Tuner:
                 fid = int(fid)
                 if feat_type == "Categ":
                     self.categorical_features += [fid]
-                self.num_features += 1
         with open(self.time_log_fname, "w") as _:
             pass
             

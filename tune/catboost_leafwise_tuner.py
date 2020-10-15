@@ -7,7 +7,7 @@ import sys
 
 class CatBoostTuner(Tuner):
     def __init__(self, train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
-            n_cv_folds, num_trees, num_threads, time_log_fname, data_format, train_query_fname=None, test_query_fname=None):
+            n_cv_folds, num_trees, num_threads, time_log_fname, train_query_fname=None, test_query_fname=None):
         super().__init__(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
             n_cv_folds, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
         print("using CatBoost in " + str(cat.__file__))
@@ -40,7 +40,6 @@ class CatBoostTuner(Tuner):
             param_dict["max_ctr_complexity"] = hp.randint('max_ctr_complexity', 6) + 1
         self.param_space = param_dict
         self.column_description_fname = feat_types_fname
-        self.data_format = data_format
 
 
     def fullfill_parameters(self, params, seed):
@@ -80,15 +79,15 @@ class CatBoostTuner(Tuner):
             return None
 
     def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None, early_stopping_rounds=None):
-        prefix = ""
-        if self.data_format == "libsvm":
-            prefix = self.data_format + "://"
+        prefix = "libsvm://"
         train_group_id = self._get_group_id_from_file(train_query_fname)
         test_group_id = self._get_group_id_from_file(test_query_fname)
         train_data = cat.Pool(prefix + train_file, column_description=self.column_description_fname)
         test_data = cat.Pool(prefix + test_file, column_description=self.column_description_fname)
-        train_data.set_group_id(train_group_id)
-        test_data.set_group_id(test_group_id)
+        if train_group_id is not None:
+            assert test_group_id is not None
+            train_data.set_group_id(train_group_id)
+            test_data.set_group_id(test_group_id)
         self.fullfill_parameters(params, seed)
         print("eval with params " + str(params))
         cat_booster = cat.CatBoost(params=params)
@@ -100,9 +99,9 @@ class CatBoostTuner(Tuner):
         return cat_booster, results
 
 if __name__ == "__main__":
-    if len(sys.argv) != 12 and len(sys.argv) != 14:
+    if len(sys.argv) != 11 and len(sys.argv) != 13:
         print("usage: python catboost_leafwise_tuner.py <train_fname> <test_fname> <feat_types_fname>"
-            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname> <data_format> [train_query_fname test_query_fname]")
+            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname> [train_query_fname test_query_fname]")
         exit(0)
     train_fname = sys.argv[1]
     test_fname = sys.argv[2]
@@ -114,13 +113,12 @@ if __name__ == "__main__":
     num_trees = int(sys.argv[8])
     num_threads = int(sys.argv[9])
     time_log_fname = sys.argv[10]
-    data_format = sys.argv[11]
-    if len(sys.argv) == 12:
+    if len(sys.argv) == 11:
         catboost_tuner = CatBoostTuner(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
-            n_cv_folds, num_trees, num_threads, time_log_fname, data_format)
+            n_cv_folds, num_trees, num_threads, time_log_fname)
     else:
-        train_query_fname = sys.argv[12]
-        test_query_fname = sys.argv[13]
+        train_query_fname = sys.argv[11]
+        test_query_fname = sys.argv[12]
         catboost_tuner = CatBoostTuner(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, num_trees,\
-            num_threads, time_log_fname, data_format, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
+            num_threads, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
     catboost_tuner.run()

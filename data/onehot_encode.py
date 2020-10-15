@@ -2,6 +2,8 @@ import numpy as np
 
 data_list = [("adult",15), ("amazon",10), ("appetency",420), ("click",12), ("internet",69), ("kick",44), ("upselling",420), ("nips_b",26), ("nips_c",64)]
 data_dir = "simplified_data"
+#data_list = [("click_small",12), ("nips_b_small",26), ("nips_c_small",64)]
+#data_dir = "simplified_data/small"
 
 def onehot_encode(train_fname, test_fname, feat_type_fname,\
     out_train_fname, out_test_fname, out_type_fname, out_count_fname, num_feats):
@@ -56,7 +58,7 @@ def onehot_encode(train_fname, test_fname, feat_type_fname,\
                         else:
                             new_feat_id = num_feat_map[feat_id]
                             num_elements += ["{0}:{1}".format(new_feat_id, feat_val)]
-                    new_line = " ".join([elements[0]] + num_elements + cat_elements) + "\n"
+                    new_line = " ".join([elements[0]] + num_elements + cat_elements + ["{0}:0".format(offset)]) + "\n"
                     out_data_file.write(new_line)
             encode_file(train_file, out_train_file)
             encode_file(test_file, out_test_file)

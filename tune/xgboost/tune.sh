@@ -1,6 +1,6 @@
 python -u ../xgboost_exact_tuner.py ../../data/higgs_small.train ../../data/higgs_small.test ../../data/higgs.train.type tmp binary 100 5 1000 16 higgs_exact.log > higgs_exact_tune.log
-#python -u ../xgboost_exact_tuner.py ../../data/yahoo_small.train ../../data/yahoo_small.test ../../data/yahoo.train.type tmp ranking 100 5 1000 16 yahoo_exact.log > yahoo_exact_tune.log
-#python -u ../xgboost_exact_tuner.py ../../data/msltr_small.train ../../data/msltr_small.test ../../data/msltr.train.type tmp ranking 100 5 1000 16 msltr_exact.log > msltr_exact_tune.log
+python -u ../xgboost_exact_tuner.py ../../data/yahoo_small.train ../../data/yahoo_small.test ../../data/yahoo.train.type tmp ranking 100 5 1000 16 yahoo_exact.log ../../data/yahoo_small.train.query ../../data/yahoo_small.test.query > yahoo_exact_tune.log
+python -u ../xgboost_exact_tuner.py ../../data/msltr_small.train ../../data/msltr_small.test ../../data/msltr.train.type tmp ranking 100 5 1000 16 msltr_exact.log ../../data/msltr_small.train.query ../../data/msltr_small.test.query > msltr_exact_tune.log
 python -u ../xgboost_exact_tuner.py ../../data/dataexpo_onehot_small.train ../../data/dataexpo_onehot_small.test ../../data/dataexpo_onehot.train.type tmp binary 100 5 1000 16 expo_exact.log > expo_exact_tune.log
 python -u ../xgboost_exact_tuner.py ../../data/allstate_small.train ../../data/allstate_small.test ../../data/allstate.train.type tmp binary 100 5 1000 16 allstate_exact.log > allstate_exact_tune.log
 python -u ../xgboost_exact_tuner.py ../../data/adult.train ../../data/adult.test ../../data/adult.train.type tmp binary 100 5 1000 16 adult_exact.log > adult_exact_tune.log
@@ -16,8 +16,8 @@ python -u ../xgboost_exact_tuner.py ../../data/year.train ../../data/year.test .
 
 
 python -u ../xgboost_hist_tuner.py ../../data/higgs_small.train ../../data/higgs_small.test ../../data/higgs.train.type tmp binary 100 5 1000 16 higgs_hist.log > higgs_hist_tune.log
-#python -u ../xgboost_hist_tuner.py ../../data/yahoo_small.train ../../data/yahoo_small.test ../../data/yahoo.train.type tmp ranking 100 5 1000 16 yahoo_hist.log > yahoo_hist_tune.log
-#python -u ../xgboost_hist_tuner.py ../../data/msltr_small.train ../../data/msltr_small.test ../../data/msltr.train.type tmp ranking 100 5 1000 16 msltr_hist.log > msltr_hist_tune.log
+python -u ../xgboost_hist_tuner.py ../../data/yahoo_small.train ../../data/yahoo_small.test ../../data/yahoo.train.type tmp ranking 100 5 1000 16 yahoo_hist.log ../../data/yahoo_small.train.query ../../data/yahoo_small.test.query > yahoo_hist_tune.log
+python -u ../xgboost_hist_tuner.py ../../data/msltr_small.train ../../data/msltr_small.test ../../data/msltr.train.type tmp ranking 100 5 1000 16 msltr_hist.log ../../data/msltr_small.train.query ../../data/msltr_small.test.query > msltr_hist_tune.log
 python -u ../xgboost_hist_tuner.py ../../data/dataexpo_onehot_small.train ../../data/dataexpo_onehot_small.test ../../data/dataexpo_onehot.train.type tmp binary 100 5 1000 16 expo_hist.log > expo_hist_tune.log
 python -u ../xgboost_hist_tuner.py ../../data/allstate_small.train ../../data/allstate_small.test ../../data/allstate.train.type tmp binary 100 5 1000 16 allstate_hist.log > allstate_hist_tune.log
 python -u ../xgboost_hist_tuner.py ../../data/adult.train ../../data/adult.test ../../data/adult.train.type tmp binary 100 5 1000 16 adult_hist.log > adult_hist_tune.log

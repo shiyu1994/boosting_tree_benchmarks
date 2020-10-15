@@ -6,8 +6,10 @@ import numpy as np
 import sys
 
 class XGBoostTuner(Tuner):
-    def __init__(self, train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname):
-        super().__init__(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, time_log_fname)
+    def __init__(self, train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
+            n_cv_folds, num_trees, num_threads, time_log_fname, train_query_fname=None, test_query_fname=None):
+        super().__init__(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
+            n_cv_folds, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
         print("using XGBoost in " + str(xgb.__file__))
         if self.task == "ranking":
             self.objective = "rank:ndcg"
@@ -23,7 +25,6 @@ class XGBoostTuner(Tuner):
             'eta': hp.loguniform('eta', -7, 0),
             'max_depth':hp.randint('max_depth', 9) + 2,
             'colsample_bytree': hp.uniform('colsample_bytree', 0.5, 1),
-            'colsample_level': hp.uniform('colsample_level', 0.5, 1),
             'subsample': hp.uniform('subsample', 0.5, 1),
             'min_child_weight': hp.loguniform('min_child_weight', -16, 5),
             'alpha': hp.choice('alpha', [0, hp.loguniform('alpha_log', -16, 2)]),
@@ -50,26 +51,32 @@ class XGBoostTuner(Tuner):
             "objective": self.objective,
             "eval_metric": self.metric,
             "nthread": self.num_threads,
-            "seed":seed,
-            "num_round": self.num_trees
+            "seed":seed
         })
 
-    def eval(self, params, train_file, test_file, seed=0):
-        train_data = xgb.DMatrix(train_file)
-        test_data = xgb.DMatrix(test_file)
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None):
+        train_data = xgb.DMatrix(train_file, feature_names=["{}".format(i) for i in range(self.num_features)])
+        test_data = xgb.DMatrix(test_file, feature_names=["{}".format(i) for i in range(self.num_features)])
+        if train_query_fname is not None:
+            assert test_query_fname is not None
+            train_group = np.genfromtxt(train_query_fname, delimiter=",", dtype=np.int)
+            test_group = np.genfromtxt(test_query_fname, delimiter=",", dtype=np.int)
+            train_data.set_group(train_group)
+            test_data.set_group(test_group)
         eval_results = {}
         self.fullfill_parameters(params, seed)
         print("eval with params " + str(params))
-        xgb_booster = xgb.train(params=params, dtrain=train_data, evals=[(test_data, "test")], evals_result=eval_results)
+        xgb_booster = xgb.train(params=params, dtrain=train_data, evals=[(test_data, "test")],\
+            evals_result=eval_results, num_boost_round=self.num_trees)
         results = eval_results["test"][self.metric]
         train_data = None
         test_data = None
         return xgb_booster, results
-                    
+
 if __name__ == "__main__":
-    if len(sys.argv) != 11:
+    if len(sys.argv) != 11 and len(sys.argv) != 13:
         print("usage: python xgboost_exact_tuner.py <train_fname> <test_fname> <feat_types_fname>"
-            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname>")
+            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname> [train_query_fname test_query_fname]")
         exit(0)
     train_fname = sys.argv[1]
     test_fname = sys.argv[2]
@@ -81,5 +88,11 @@ if __name__ == "__main__":
     num_trees = int(sys.argv[8])
     num_threads = int(sys.argv[9])
     time_log_fname = sys.argv[10]
-    xgb_tuner = XGBoostTuner(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname)
+    if len(sys.argv) == 11:
+        xgb_tuner = XGBoostTuner(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname)
+    else:
+        train_query_fname = sys.argv[11]
+        test_query_fname = sys.argv[12]
+        xgb_tuner = XGBoostTuner(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
+            n_cv_folds, num_trees, num_threads, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
     xgb_tuner.run()

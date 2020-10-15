@@ -6,8 +6,10 @@ import numpy as np
 import sys
 
 class LightGBMTuner(Tuner):
-    def __init__(self, train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname):
-        super().__init__(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, time_log_fname)
+    def __init__(self, train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir, task,\
+            max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, train_query_fname=None, test_query_fname=None):
+        super().__init__(train_fname, test_fname, feat_types_fname, work_dir, task,\
+            max_evals, n_cv_folds, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
         print("using LightGBM in " + str(lgb.__file__))
         if self.task == "ranking":
             self.objective = "lambdarank"
@@ -32,7 +34,7 @@ class LightGBMTuner(Tuner):
             max_cat_count = 0
             with open(cat_count_fname, "r") as in_file:
                 for line in in_file:
-                    _, cat_count = line.strip().split(":")
+                    _, cat_count = line.strip().split("\t")
                     cat_count = int(cat_count)
                     if cat_count > max_cat_count:
                         max_cat_count = cat_count
@@ -40,21 +42,23 @@ class LightGBMTuner(Tuner):
             param_dict["cat_l2"] = hp.qloguniform('cat_l2', 0, 6, 1)
             param_dict["max_cat_threshold"] = hp.randint('max_cat_threshold', max_cat_count // 2 + 1)
         self.param_space = param_dict
+        self.metric = None
 
 
     def fullfill_parameters(self, params, seed):
         if self.objective == "binary":
-            metric = "auc"
+            self.metric = "auc"
         elif self.objective == "regression":
-            metric = "rmse"
+            self.metric = "rmse"
         elif self.objective == "lambdarank":
-            metric = "ndcg@5"
+            self.metric = "ndcg"
+            params.update({"ndcg_eval_at":5})
         else:
             raise NotImplementedError("unknown objective type {}".format(self.objective))
 
         params.update({
             "objective": self.objective,
-            "metric": metric,
+            "metric": self.metric,
             "num_threads": self.num_threads,
             "bagging_freq": 1,
             "seed":seed,
@@ -66,23 +70,35 @@ class LightGBMTuner(Tuner):
         if "max_cat_threshold" in params:
             params["max_cat_threshold"] = int(params["max_cat_threshold"])
 
-    def eval(self, params, train_file, test_file, seed=0):
-        train_data = lgb.Dataset(train_file)
-        test_data = lgb.Dataset(test_file, reference=train_data)
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None):
+        if train_query_fname is not None:
+            assert test_query_fname is not None
+            train_group = np.genfromtxt(train_query_fname, delimiter=",", dtype=np.int)
+            test_group = np.genfromtxt(test_query_fname, delimiter=",", dtype=np.int)
+        else:
+            train_group = None
+            test_group = None
+        train_data = lgb.Dataset(train_file, group=train_group)
+        test_data = lgb.Dataset(test_file, reference=train_data, group=test_group)
         eval_results = {}
         self.fullfill_parameters(params, seed)
         print("eval with params " + str(params))
         lgb_booster = lgb.train(params, train_data, valid_sets=[test_data], valid_names=["test"], evals_result=eval_results,
             categorical_feature=self.categorical_features, keep_training_booster=True)
-        results = eval_results["test"]["auc"] if self.objective == "binary" else eval_results["test"]["rmse"]
+        for key in eval_results:
+            print("key=", key)
+        if "ndcg_eval_at" in params:
+            results = eval_results["test"][self.metric + "@{}".format(params["ndcg_eval_at"])]
+        else:
+            results = eval_results["test"][self.metric]
         train_data = None
         test_data = None
         return lgb_booster, results
 
 if __name__ == "__main__":
-    if len(sys.argv) != 12:
+    if len(sys.argv) != 12 and len(sys.argv) != 14:
         print("usage: python lightgbm_tuner.py <train_fname> <test_fname> <feat_types_fname> <cat_count_fname>"
-            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname>")
+            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname> [train_query_fname test_query_fname]")
         exit(0)
     train_fname = sys.argv[1]
     test_fname = sys.argv[2]
@@ -95,5 +111,11 @@ if __name__ == "__main__":
     num_trees = int(sys.argv[9])
     num_threads = int(sys.argv[10])
     time_log_fname = sys.argv[11]
-    lgb_tuner = LightGBMTuner(train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname)
+    if len(sys.argv) == 12:
+        lgb_tuner = LightGBMTuner(train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname)
+    else:
+        train_query_fname = sys.argv[12]
+        test_query_fname = sys.argv[13]
+        lgb_tuner = LightGBMTuner(train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir, task,\
+            max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
     lgb_tuner.run()

@@ -6,8 +6,10 @@ import numpy as np
 import sys
 
 class CatBoostTuner(Tuner):
-    def __init__(self, train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, data_format):
-        super().__init__(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, time_log_fname)
+    def __init__(self, train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
+            n_cv_folds, num_trees, num_threads, time_log_fname, data_format, train_query_fname=None, test_query_fname=None):
+        super().__init__(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
+            n_cv_folds, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
         print("using CatBoost in " + str(cat.__file__))
         if self.task == "ranking":
             self.objective = "YetiRank"
@@ -22,7 +24,6 @@ class CatBoostTuner(Tuner):
         param_dict = {
             'learning_rate': hp.loguniform('learning_rate', -7, 0),
             'num_leaves' : hp.qloguniform('num_leaves', 1, 7, 1),
-            'max_depth':0,
             'border_count': 2 ** (hp.randint('max_bin_minus_4', 7) + 4),
             'random_strength': hp.randint('random_strength', 20) + 1,
             'colsample_bylevel': hp.uniform('feature_fraction', 0.5, 1),
@@ -48,7 +49,7 @@ class CatBoostTuner(Tuner):
         elif self.objective == "RMSE":
             self.metric = "RMSE"
         elif self.objective == "YetiRank":
-            self.metric = "NDCG:top=5"
+            self.metric = "NDCG:top=5;type=Exp"
         else:
             raise NotImplementedError("unknown objective type {}".format(self.objective))
 
@@ -64,12 +65,30 @@ class CatBoostTuner(Tuner):
         params["num_leaves"] = int(params["num_leaves"])
         params["min_data_in_leaf"] = int(params["min_data_in_leaf"])
 
-    def eval(self, params, train_file, test_file, seed=0):
+    def _get_group_id_from_file(self, query_fname):
+        if query_fname is not None:
+            group_id = []
+            with open(query_fname, "r") as in_file:
+                cur_group_id = 0
+                for line in in_file:
+                    item_counts = int(line.strip())
+                    for _ in range(item_counts):
+                        group_id += [cur_group_id]
+                    cur_group_id += 1
+            return np.array(group_id)
+        else:
+            return None
+
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None):
         prefix = ""
         if self.data_format == "libsvm":
             prefix = self.data_format + "://"
+        train_group_id = self._get_group_id_from_file(train_query_fname)
+        test_group_id = self._get_group_id_from_file(test_query_fname)
         train_data = cat.Pool(prefix + train_file, column_description=self.column_description_fname)
         test_data = cat.Pool(prefix + test_file, column_description=self.column_description_fname)
+        train_data.set_group_id(train_group_id)
+        test_data.set_group_id(test_group_id)
         self.fullfill_parameters(params, seed)
         print("eval with params " + str(params))
         cat_booster = cat.CatBoost(params=params)
@@ -81,9 +100,9 @@ class CatBoostTuner(Tuner):
         return cat_booster, results
 
 if __name__ == "__main__":
-    if len(sys.argv) != 12:
+    if len(sys.argv) != 12 and len(sys.argv) != 14:
         print("usage: python catboost_leafwise_tuner.py <train_fname> <test_fname> <feat_types_fname>"
-            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname> <data_format>")
+            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname> <data_format> [train_query_fname test_query_fname]")
         exit(0)
     train_fname = sys.argv[1]
     test_fname = sys.argv[2]
@@ -96,5 +115,12 @@ if __name__ == "__main__":
     num_threads = int(sys.argv[9])
     time_log_fname = sys.argv[10]
     data_format = sys.argv[11]
-    catboost_tuner = CatBoostTuner(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, data_format)
+    if len(sys.argv) == 12:
+        catboost_tuner = CatBoostTuner(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals,\
+            n_cv_folds, num_trees, num_threads, time_log_fname, data_format)
+    else:
+        train_query_fname = sys.argv[12]
+        test_query_fname = sys.argv[13]
+        catboost_tuner = CatBoostTuner(train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, num_trees,\
+            num_threads, time_log_fname, data_format, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
     catboost_tuner.run()

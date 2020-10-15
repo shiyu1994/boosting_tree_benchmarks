@@ -4,8 +4,8 @@ def get_cat_col(feat_type_fname):
     with open(feat_type_fname, "r") as in_file:
         cat_feat_list = []
         for line in in_file:
-            feat_idx, feat_type = line.strip().split(":")
-            if feat_type == "Categorical":
+            feat_idx, feat_type = line.strip().split("\t")
+            if feat_type == "Categ":
                 cat_feat_list += [feat_idx]
         print(",".join(cat_feat_list))
 

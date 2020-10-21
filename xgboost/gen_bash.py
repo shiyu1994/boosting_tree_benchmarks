@@ -49,7 +49,7 @@ def gen(start_data_idx, end_data_idx):
                     data_path, obj, data_name, large_setting_hist
                 )
                 accuracy_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train eval[test]={0}.test objective={1} "
-                    "{3} {4} 2>&1 | tee xgboost_hist_{2}_speed.log\n").format(
+                    "{3} {4} 2>&1 | tee xgboost_hist_{2}_accuracy.log\n").format(
                     data_path, obj, data_name, metric_is, large_setting_hist
                 )
                 speed_line_exact = ("xgboost/xgboost xgboost.conf data={0}.train objective={1} "
@@ -57,7 +57,7 @@ def gen(start_data_idx, end_data_idx):
                     data_path, obj, data_name, large_setting_exact
                 )
                 accuracy_line_exact = ("xgboost/xgboost xgboost.conf data={0}.train eval[test]={0}.test objective={1} "
-                    "{3} {4} 2>&1 | tee xgboost_exact_{2}_speed.log\n").format(
+                    "{3} {4} 2>&1 | tee xgboost_exact_{2}_accuracy.log\n").format(
                     data_path, obj, data_name, metric_is, large_setting_exact
                 )
             else:
@@ -66,7 +66,7 @@ def gen(start_data_idx, end_data_idx):
                     data_path, obj, data_name, small_setting_hist
                 )
                 accuracy_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train eval[test]={0}.test objective={1} "
-                    "{3} {4} 2>&1 | tee xgboost_hist_{2}_speed.log\n").format(
+                    "{3} {4} 2>&1 | tee xgboost_hist_{2}_accuracy.log\n").format(
                     data_path, obj, data_name, metric_is, small_setting_hist
                 )
                 speed_line_exact = ("xgboost/xgboost xgboost.conf data={0}.train objective={1} "
@@ -74,7 +74,7 @@ def gen(start_data_idx, end_data_idx):
                     data_path, obj, data_name, small_setting_exact
                 )
                 accuracy_line_exact = ("xgboost/xgboost xgboost.conf data={0}.train eval[test]={0}.test objective={1} "
-                    "{3} {4} 2>&1 | tee xgboost_exact_{2}_speed.log\n").format(
+                    "{3} {4} 2>&1 | tee xgboost_exact_{2}_accuracy.log\n").format(
                     data_path, obj, data_name, metric_is, small_setting_exact
                 )
             speed_out_file.write(speed_line_exact)

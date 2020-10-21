@@ -53,7 +53,7 @@ def gen(start_data_idx, end_data_idx):
                             data_path, obj, data_name, ",".join(categorical_columns)
                         )
                         accuracy_line = ("LightGBM/lightgbm config=lightgbm.conf data={0}.train valid={0}.test objective={1} "
-                            "metric={2} cateogrical_feature={4} 2>&1 | tee lightgbm_{3}_speed.log\n").format(
+                            "metric={2} cateogrical_feature={4} 2>&1 | tee lightgbm_{3}_accuracy.log\n").format(
                             data_path, obj, metric, data_name, ",".join(categorical_columns)
                         )
                     else:
@@ -62,7 +62,7 @@ def gen(start_data_idx, end_data_idx):
                             data_path, obj, data_name, ",".join(categorical_columns), small_setting
                         )
                         accuracy_line = ("LightGBM/lightgbm config=lightgbm.conf data={0}.train valid={0}.test objective={1} "
-                            "metric={2} cateogrical_feature={4} {5} 2>&1 | tee lightgbm_{3}_speed.log\n").format(
+                            "metric={2} cateogrical_feature={4} {5} 2>&1 | tee lightgbm_{3}_accuracy.log\n").format(
                             data_path, obj, metric, data_name, ",".join(categorical_columns), small_setting
                         )
                 else:
@@ -72,7 +72,7 @@ def gen(start_data_idx, end_data_idx):
                             data_path, obj, data_name
                         )
                         accuracy_line = ("LightGBM/lightgbm config=lightgbm.conf data={0}.train valid={0}.test objective={1} "
-                            "metric={2} 2>&1 | tee lightgbm_{3}_speed.log\n").format(
+                            "metric={2} 2>&1 | tee lightgbm_{3}_accuracy.log\n").format(
                             data_path, obj, metric, data_name
                         )
                     else:
@@ -81,7 +81,7 @@ def gen(start_data_idx, end_data_idx):
                             data_path, obj, data_name, small_setting
                         )
                         accuracy_line = ("LightGBM/lightgbm config=lightgbm.conf data={0}.train valid={0}.test objective={1} "
-                            "metric={2} {4} 2>&1 | tee lightgbm_{3}_speed.log\n").format(
+                            "metric={2} {4} 2>&1 | tee lightgbm_{3}_accuracy.log\n").format(
                             data_path, obj, metric, data_name, small_setting
                         )
                 speed_out_file.write(speed_line)

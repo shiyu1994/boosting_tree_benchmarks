@@ -5,6 +5,6 @@
     "learning_rate":0.02,
     "grow_policy":"SymmetricTree",
     "boosting_type":"Ordered",
-    "max_depth":8,
+    "depth":8,
     "min_data_in_leaf":400
 }

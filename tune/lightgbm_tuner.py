@@ -70,7 +70,8 @@ class LightGBMTuner(Tuner):
         if "max_cat_threshold" in params:
             params["max_cat_threshold"] = int(params["max_cat_threshold"])
 
-    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None, early_stopping_rounds=None):
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None,\
+        early_stopping_rounds=None, num_rounds=None):
         if train_query_fname is not None:
             assert test_query_fname is not None
             train_group = np.genfromtxt(train_query_fname, delimiter=",", dtype=np.int)

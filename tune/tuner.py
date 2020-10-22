@@ -15,6 +15,8 @@ class Tuner:
         self.n_cv_folds = n_cv_folds
         self.n_rseed = 3
         self.n_seed = 3
+        self.early_stopping_rounds = 50
+        self.is_first_log = True
         self.time_log_fname = time_log_fname
         self.start_time = None
         self.test_time = 0.0
@@ -34,9 +36,12 @@ class Tuner:
         if not os.path.exists(work_dir):
             os.system("mkdir {}".format(work_dir))
 
-
-    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None):
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None,\
+        early_stopping_rounds=None, num_rounds=None):
         raise NotImplementedError("method eval is not implemented in Tuner class")
+
+    def predict(self, params, test_file, seed, test_query_fname=None):
+        raise NotImplementedError("method predict is not implemented in Tuner class")
 
     def fullfill_parameters(self):
          raise NotImplementedError("method fullfill_parameters is not implemented in Tuner class")
@@ -126,12 +131,9 @@ class Tuner:
         eval_scores = []
         status = hpt.STATUS_OK
         for train_file, test_file, train_query_file, test_query_file in zip(train_files, test_files, train_query_files, test_query_files):
-            try:
-                _, eval_score = self.eval(params, train_file, test_file, seed, train_query_file, test_query_file, early_stopping_rounds=50)
-                eval_scores.append(eval_score)
-            except Exception as err:
-                print("failed at params " + str(params))
-                print("error message: ", err)
+            _, eval_score = self.eval(params, train_file, test_file, seed, train_query_file, test_query_file,\
+                early_stopping_rounds=self.early_stopping_rounds)
+            eval_scores.append(eval_score)
         assert len(eval_scores) == self.n_cv_folds
         if status == hpt.STATUS_OK:
             min_eval_len = len(eval_scores[0])
@@ -170,22 +172,25 @@ class Tuner:
         return cv_result
 
     def log_into_file(self):
-        try:
+        if not self.is_first_log:
             start_time = time.time()
             cur_best_params = self.trials.best_trial["result"]["params"]
             all_test_scores = []
             best_iter = self.trials.best_trial["result"]["best_iter"]
+            best_num_rounds = self.trials.best_trial["result"]["best_num_trees"]
+            assert best_num_rounds == best_iter + 1
             for seed in range(self.n_seed):
                 _, test_score = self.eval(cur_best_params, self.train_fname, self.test_fname, seed=seed,\
-                    train_query_fname=self.train_query_fname, test_query_fname=self.test_query_fname)
+                    train_query_fname=self.train_query_fname, test_query_fname=self.test_query_fname,\
+                    num_rounds=best_num_rounds)
+                assert best_iter < len(test_score)
                 all_test_scores.append(test_score[best_iter])
             self.test_time += time.time() - start_time
             with open(self.time_log_fname, "a") as time_log_file:
                 time_log_file.write("{0}:{1}\n".format(self.time_tag,\
                     ",".join(str(val) for val in all_test_scores)))
-        except:
-            with open(self.time_log_fname, "a") as time_log_file:
-                time_log_file.write("first round\n")
+        else:
+            self.is_first_log = False
 
     def get_best_params_from_cv(self, rseed=0):
         self.trials = hpt.Trials()
@@ -202,19 +207,20 @@ class Tuner:
             self.start_time = time.time()
             self.test_time = 0.0
             self.time_tag = 0.0
+            self.is_first_log = True
             with open(self.time_log_fname, "a") as time_log_file:
                 time_log_file.write("rseed={}\n".format(rseed))
             self.get_best_params_from_cv(rseed=rseed)
             best_params = self.trials.best_trial["result"]["params"]
             print("best_params", best_params)
             best_iter = self.trials.best_trial["result"]["best_iter"]
+            best_num_rounds = self.trials.best_trial["result"]["best_num_trees"]
+            assert best_num_rounds == best_iter + 1
             for seed in range(self.n_seed):
-                try:
-                    _, test_score = self.eval(best_params, self.train_fname, self.test_fname, seed=seed,\
-                        train_query_fname=self.train_query_fname, test_query_fname=self.test_query_fname)
-                except:
-                    print("exception when evaluation")
-                    best_iter = len(test_score) - 1
+                _, test_score = self.eval(best_params, self.train_fname, self.test_fname, seed=seed,\
+                    train_query_fname=self.train_query_fname, test_query_fname=self.test_query_fname,\
+                    num_rounds=best_num_rounds)
+                assert best_iter < len(test_score)
                 all_test_scores.append(test_score[best_iter])
             mean_test_score = np.mean(all_test_scores)
             var_test_score = np.var(all_test_scores)

@@ -54,7 +54,8 @@ class XGBoostTuner(Tuner):
             "seed":seed
         })
 
-    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None, early_stopping_rounds=None):
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None,\
+        early_stopping_rounds=None, num_rounds=None):
         train_data = xgb.DMatrix(train_file)
         test_data = xgb.DMatrix(test_file)
         if train_query_fname is not None:

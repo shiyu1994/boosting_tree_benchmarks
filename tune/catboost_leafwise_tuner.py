@@ -78,7 +78,8 @@ class CatBoostTuner(Tuner):
         else:
             return None
 
-    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None, early_stopping_rounds=None):
+    def eval(self, params, train_file, test_file, seed=0, train_query_fname=None, test_query_fname=None,\
+        early_stopping_rounds=None, num_rounds=None):
         prefix = "libsvm://"
         train_group_id = self._get_group_id_from_file(train_query_fname)
         test_group_id = self._get_group_id_from_file(test_query_fname)
@@ -89,11 +90,23 @@ class CatBoostTuner(Tuner):
             train_data.set_group_id(train_group_id)
             test_data.set_group_id(test_group_id)
         self.fullfill_parameters(params, seed)
+        if num_rounds is not None:
+            params["iterations"] = num_rounds
         print("eval with params " + str(params))
         cat_booster = cat.CatBoost(params=params)
-        cat_booster.fit(train_data, eval_set=[test_data], verbose=1, early_stopping_rounds=early_stopping_rounds)
+        try:
+            cat_booster.fit(train_data, eval_set=[test_data], verbose=1, early_stopping_rounds=early_stopping_rounds)
+        except Exception as err:
+            print("error message: ", err)
         eval_results = cat_booster.get_evals_result()
         results = eval_results["validation"][self.metric]
+        if num_rounds is not None and len(results) < num_rounds:
+            eval_result_list = []
+            for result in results:
+                eval_result_list += [result]
+            for _ in range(len(results), num_rounds):
+                eval_result_list += [results[-1]]
+            results = np.array(eval_result_list)
         train_data = None
         test_data = None
         return cat_booster, results

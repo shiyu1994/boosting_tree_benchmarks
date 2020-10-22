@@ -35,7 +35,7 @@ def gen(start_data_idx, end_data_idx):
             data_name = data.split("/")[-1]
             if obj == "ranking":
                 obj = "YetiRank"
-                metrics = ["NDCG@1", "NDCG@3", "NDCG@5", "NDCG@10"]
+                metrics = ["NDCG:top=1;type=Exp", "NDCG:top=3;type=Exp", "NDCG:top=5;type=Exp", "NDCG:top=10;type=Exp"]
             elif obj == "binary":
                 obj = "Logloss"
                 metrics = ["AUC"]
@@ -45,36 +45,36 @@ def gen(start_data_idx, end_data_idx):
             data_path = data_dir + "/" + data
             for metric in metrics:
                 if setting == "large":
-                    speed_line_leafwise = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set {0}.train "
+                    speed_line_leafwise = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set libsvm://{0}.train "
                         "--column-description {0}.cd --loss-function {1} 2>&1 | tee xgboost_hist_{2}_speed.log\n").format(
                         data_path, obj, data_name, large_setting_leafwise
                     )
-                    accuracy_line_leafwise = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set {0}.train --test-set {0}.test "
+                    accuracy_line_leafwise = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set libsvm://{0}.train --test-set libsvm://{0}.test "
                         "--column-description {0}.cd --loss-function {1} --eval-metric {4} 2>&1 | tee xgboost_hist_{2}_accuracy.log\n").format(
                         data_path, obj, data_name, large_setting_leafwise, metric
                     )
-                    speed_line_symmetric = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set {0}.train "
+                    speed_line_symmetric = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set libsvm://{0}.train "
                         "--column-description {0}.cd --loss-function {1} 2>&1 | tee xgboost_hist_{2}_speed.log\n").format(
                         data_path, obj, data_name, large_setting_symmetric
                     )
-                    accuracy_line_symmetric = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set {0}.train --test-set {0}.test "
+                    accuracy_line_symmetric = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set libsvm://{0}.train --test-set libsvm://{0}.test "
                         "--column-description {0}.cd --loss-function {1} --eval-metric {4} 2>&1 | tee xgboost_hist_{2}_accuracy.log\n").format(
                         data_path, obj, data_name, large_setting_symmetric, metric
                     )
                 else:
-                    speed_line_leafwise = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set {0}.train "
+                    speed_line_leafwise = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set libsvm://{0}.train "
                         "--column-description {0}.cd --loss-function {1} 2>&1 | tee xgboost_hist_{2}_speed.log\n").format(
                         data_path, obj, data_name, small_setting_leafwise
                     )
-                    accuracy_line_leafwise = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set {0}.train --test-set {0}.test "
+                    accuracy_line_leafwise = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set libsvm://{0}.train --test-set libsvm://{0}.test "
                         "--column-description {0}.cd --loss-function {1} --eval-metric {4} 2>&1 | tee xgboost_hist_{2}_accuracy.log\n").format(
                         data_path, obj, data_name, small_setting_leafwise, metric
                     )
-                    speed_line_symmetric = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set {0}.train "
+                    speed_line_symmetric = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set libsvm://{0}.train "
                         "--column-description {0}.cd --loss-function {1} 2>&1 | tee xgboost_hist_{2}_speed.log\n").format(
                         data_path, obj, data_name, small_setting_symmetric
                     )
-                    accuracy_line_symmetric = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set {0}.train --test-set {0}.test "
+                    accuracy_line_symmetric = ("catboost/catboost/app/catboost fit --params-file {3} --learn-set libsvm://{0}.train --test-set libsvm://{0}.test "
                         "--column-description {0}.cd --loss-function {1} --eval-metric {4} 2>&1 | tee xgboost_hist_{2}_accuracy.log\n").format(
                         data_path, obj, data_name, small_setting_symmetric, metric
                     )

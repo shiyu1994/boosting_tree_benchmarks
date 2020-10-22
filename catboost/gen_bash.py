@@ -24,10 +24,10 @@ def gen(start_data_idx, end_data_idx):
     data_dir = "../data"
     accuracy_bash_file_name = "test_accuracy.sh"
     speed_bash_file_name = "test_speed.sh"
-    small_setting_leafwise = "params_leaf_wise_small"
-    large_setting_leafwise = "params_leaf_wise_large"
-    small_setting_symmetric = "params_symmetric_small"
-    large_setting_symmetric = "params_symmetric_large"
+    small_setting_leafwise = "params_leaf_wise_small.json"
+    large_setting_leafwise = "params_leaf_wise_large.json"
+    small_setting_symmetric = "params_symmetric_small.json"
+    large_setting_symmetric = "params_symmetric_large.json"
 
     with open(accuracy_bash_file_name, "w") as accuracy_out_file,\
         open(speed_bash_file_name, "w") as speed_out_file:

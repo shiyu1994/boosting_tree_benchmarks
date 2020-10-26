@@ -1,8 +1,8 @@
 from dnn import *
 
 class DeepFM(DNN):
-    def __init__(self, train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_features, layer_units):
-        super().__init__(train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_features, layer_units)
+    def __init__(self, train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_epochs, num_features, layer_units, log_fname):
+        super().__init__(train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_epochs, num_features, layer_units, log_fname)
 
     def _model_func(self):
         inputs = {}
@@ -11,7 +11,7 @@ class DeepFM(DNN):
         numeric_values = [inputs[str(feature_index)] for feature_index in self.numeric_feature]
         embeddings = {}
         for feature_index in self.cat_feature:
-            embeddings[feature_index] = layers.Embedding(self.cat_count[feature_index] + 1, 5)(inputs[str(feature_index)])
+            embeddings[feature_index] = layers.Flatten()(layers.Embedding(self.cat_count[feature_index], 5)(inputs[str(feature_index)]))
         dense_input = layers.Concatenate()(numeric_values + list(embeddings.values()))
         fcn = layers.BatchNormalization()(dense_input)
         for unit in self.layer_units:
@@ -29,8 +29,8 @@ class DeepFM(DNN):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 9:
-        print("usage: python deepfm.py <train_fname> <test_fname> <feature_type_fname> <cat_count_fname> <num_threads> <batch_size> <num_features> <layer_units>")
+    if len(sys.argv) != 11:
+        print("usage: python deepfm.py <train_fname> <test_fname> <feature_type_fname> <cat_count_fname> <num_threads> <batch_size> <num_epochs> <num_features> <layer_units> <log_fname>")
         exit(0)
     train_fname = sys.argv[1]
     test_fname = sys.argv[2]
@@ -38,7 +38,9 @@ if __name__ == "__main__":
     cat_count_fname = sys.argv[4]
     num_threads = int(sys.argv[5])
     batch_size = int(sys.argv[6])
-    num_features = int(sys.argv[7])
-    layer_units = sys.argv[8]
-    deepfm = DeepFM(train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_features, layer_units)
+    num_epochs = int(sys.argv[7])
+    num_features = int(sys.argv[8])
+    layer_units = sys.argv[9]
+    log_fname = sys.argv[10]
+    deepfm = DeepFM(train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_epochs, num_features, layer_units, log_fname)
     deepfm.train()

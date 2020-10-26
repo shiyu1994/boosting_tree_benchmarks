@@ -20,9 +20,10 @@ def gen(start_data_idx, end_data_idx):
         ("small/year_small", "regression", ["dnn"], 90)
     ]
     data_dir = "../data/"
-    archs = ["10,10", "10,10,10", "50,50,25", "100,100,50", "100,100,100,50"]
+    archs = ["20,20,10", "50,50,25", "100,100,50", "100,100,100,50"]
     num_threads = 16
     batch_size = 100
+    num_epochs = 10
     out_fname = "run.sh"
     with open(out_fname, "w") as out_file:
         for data, obj, modes, num_features in data_list:
@@ -33,7 +34,7 @@ def gen(start_data_idx, end_data_idx):
             for mode in modes:
                 for arch in archs:
                     arch_str = "_".join(arch.split(","))
-                    line = "python -u {0}.py {1}.train.csv {1}.test.csv {1}.cd {1}.count {2} {3} {4} {5} > {0}_{6}_{7}.log\n".format(
+                    line = "python -u {0}.py {1}.train.csv.norm.remap {1}.test.csv.norm.remap {1}.cd {1}.train.csv.norm.count {2} {3} {8} {4} {5} {0}_{6}_{7}.log\n".format(
                         mode,
                         data_path,
                         num_threads,
@@ -41,7 +42,8 @@ def gen(start_data_idx, end_data_idx):
                         num_features,
                         arch,
                         data_name,
-                        arch_str
+                        arch_str,
+                        num_epochs
                     )
                     out_file.write(line)
     os.system("chmod +x {0}".format(out_fname))

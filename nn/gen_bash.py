@@ -26,7 +26,7 @@ def gen(start_data_idx, end_data_idx):
     num_epochs = 10
     out_fname = "run.sh"
     with open(out_fname, "w") as out_file:
-        for data, obj, modes, num_features in data_list:
+        for data, obj, modes, num_features in data_list[start_data_id: end_data_idx]:
             if obj != "binary":
                 continue
             data_path = data_dir + data

@@ -44,11 +44,11 @@ def gen(start_data_idx, end_data_idx):
                 obj = "reg:linear"
                 metric_is = "eval_metric=rmse"
             if setting == "large":
-                speed_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train objective={1} "
+                speed_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train objective={1} max_bin=255 "
                     "{3} 2>&1 | tee xgboost_hist_{2}_speed.log\n").format(
                     data_path, obj, data_name, large_setting_hist
                 )
-                accuracy_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train eval[test]={0}.test objective={1} "
+                accuracy_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train eval[test]={0}.test objective={1} max_bin=255 "
                     "{3} {4} 2>&1 | tee xgboost_hist_{2}_accuracy.log\n").format(
                     data_path, obj, data_name, metric_is, large_setting_hist
                 )
@@ -61,11 +61,11 @@ def gen(start_data_idx, end_data_idx):
                     data_path, obj, data_name, metric_is, large_setting_exact
                 )
             else:
-                speed_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train objective={1} "
+                speed_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train objective={1} max_bin=255 "
                     "{3} 2>&1 | tee xgboost_hist_{2}_speed.log\n").format(
                     data_path, obj, data_name, small_setting_hist
                 )
-                accuracy_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train eval[test]={0}.test objective={1} "
+                accuracy_line_hist = ("xgboost/xgboost xgboost.conf data={0}.train eval[test]={0}.test objective={1} max_bin=255 "
                     "{3} {4} 2>&1 | tee xgboost_hist_{2}_accuracy.log\n").format(
                     data_path, obj, data_name, metric_is, small_setting_hist
                 )

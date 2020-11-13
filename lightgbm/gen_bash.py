@@ -49,20 +49,20 @@ def gen(start_data_idx, end_data_idx):
                 if len(categorical_columns) > 0:
                     if setting == "large":
                         speed_line = ("LightGBM/lightgbm config=lightgbm.conf data={0}.train objective={1} "
-                            "cateogrical_feature={3} 2>&1 | tee lightgbm_{2}_speed.log\n").format(
+                            "categorical_feature={3} 2>&1 | tee lightgbm_{2}_speed.log\n").format(
                             data_path, obj, data_name, ",".join(categorical_columns)
                         )
                         accuracy_line = ("LightGBM/lightgbm config=lightgbm.conf data={0}.train valid={0}.test objective={1} "
-                            "metric={2} cateogrical_feature={4} 2>&1 | tee lightgbm_{3}_accuracy.log\n").format(
+                            "metric={2} categorical_feature={4} 2>&1 | tee lightgbm_{3}_accuracy.log\n").format(
                             data_path, obj, metric, data_name, ",".join(categorical_columns)
                         )
                     else:
                         speed_line = ("LightGBM/lightgbm config=lightgbm.conf data={0}.train objective={1} "
-                            "cateogrical_feature={3} {4} 2>&1 | tee lightgbm_{2}_speed.log\n").format(
+                            "categorical_feature={3} {4} 2>&1 | tee lightgbm_{2}_speed.log\n").format(
                             data_path, obj, data_name, ",".join(categorical_columns), small_setting
                         )
                         accuracy_line = ("LightGBM/lightgbm config=lightgbm.conf data={0}.train valid={0}.test objective={1} "
-                            "metric={2} cateogrical_feature={4} {5} 2>&1 | tee lightgbm_{3}_accuracy.log\n").format(
+                            "metric={2} categorical_feature={4} {5} 2>&1 | tee lightgbm_{3}_accuracy.log\n").format(
                             data_path, obj, metric, data_name, ",".join(categorical_columns), small_setting
                         )
                 else:

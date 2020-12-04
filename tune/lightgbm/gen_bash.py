@@ -22,9 +22,9 @@ def gen(start_data_idx, end_data_idx):
     data_list = data_list[start_data_idx: end_data_idx]
 
     data_dir = "../../data"
-    n_trials = 50
-    n_cv_folds = 4
-    n_iterations = 500
+    n_trials = 200
+    n_cv_folds = 5
+    n_iterations = 1000
     n_threads = 16
     bash_file_name = "tune.sh"
 

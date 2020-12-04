@@ -3,8 +3,12 @@ import numpy as np
 import time
 import os
 
+class TimeLimException(Exception):
+    pass
+
 class Tuner:
-    def __init__(self, train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds, time_log_fname, train_query_fname=None, test_query_fname=None):
+    def __init__(self, train_fname, test_fname, feat_types_fname, work_dir, task, max_evals, n_cv_folds,
+        time_log_fname, train_query_fname=None, test_query_fname=None):
         self.train_fname = train_fname
         self.test_fname = test_fname
         self.feat_types_fname = feat_types_fname
@@ -13,8 +17,9 @@ class Tuner:
         self.task = task
         self.max_evals = max_evals
         self.n_cv_folds = n_cv_folds
-        self.n_rseed = 3
-        self.n_seed = 3
+        self.n_rseed = 5
+        self.n_seed = 5
+        self.time_lim = 17280
         self.early_stopping_rounds = 50
         self.is_first_log = True
         self.time_log_fname = time_log_fname
@@ -191,6 +196,8 @@ class Tuner:
                     ",".join(str(val) for val in all_test_scores)))
         else:
             self.is_first_log = False
+        if self.time_tag >= self.time_lim:
+            raise TimeLimException
 
     def get_best_params_from_cv(self, rseed=0):
         self.trials = hpt.Trials()
@@ -210,7 +217,10 @@ class Tuner:
             self.is_first_log = True
             with open(self.time_log_fname, "a") as time_log_file:
                 time_log_file.write("rseed={}\n".format(rseed))
-            self.get_best_params_from_cv(rseed=rseed)
+            try:
+                self.get_best_params_from_cv(rseed=rseed)
+            except TimeLimException:
+                print("time limitation exceeds")
             best_params = self.trials.best_trial["result"]["params"]
             print("best_params", best_params)
             best_iter = self.trials.best_trial["result"]["best_iter"]

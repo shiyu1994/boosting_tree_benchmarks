@@ -4,21 +4,21 @@ import sys
 def gen(start_data_idx, end_data_idx):
 
     data_list = [
-        ("small/higgs_small", "binary"),
-        ("small/yahoo_small", "ranking"),
-        ("small/msltr_small", "ranking"),
-        ("small/dataexpo_onehot_small", "binary"),
-        ("small/allstate_small", "binary"),
+        ("higgs", "binary"),
+        ("yahoo", "ranking"),
+        ("msltr", "ranking"),
+        ("dataexpo_onehot", "binary"),
+        ("allstate", "binary"),
         ("adult", "binary"),
         ("amazon", "binary"),
         ("appetency", "binary"),
-        ("small/click_small", "binary"),
+        ("click", "binary"),
         ("internet", "binary"),
         ("kick", "binary"),
         ("upselling", "binary"),
-        ("small/nips_b_small", "binary"),
-        ("small/nips_c_small", "binary"),
-        ("small/year_small", "regression")
+        ("nips_b", "binary"),
+        ("nips_c", "binary"),
+        ("year", "regression")
     ]
     data_list = data_list[start_data_idx: end_data_idx]
 

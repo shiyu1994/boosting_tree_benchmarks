@@ -201,7 +201,9 @@ class Tuner:
 
     def get_best_params_from_cv(self, rseed=0):
         self.trials = hpt.Trials()
+        start_time = time.time()
         train_files, test_files, train_query_files, test_query_files = self.partition_train_data_for_cv(rseed)
+        self.test_time += time.time() - start_time
         hpt.fmin(fn=lambda params: self.cv(params, train_files, test_files, rseed, train_query_files, test_query_files), space=self.param_space,
             algo=hpt.tpe.suggest, max_evals=self.max_evals, trials=self.trials, rstate=np.random.RandomState(rseed))
         self.log_into_file()

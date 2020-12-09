@@ -80,8 +80,12 @@ class LightGBMTuner(Tuner):
         else:
             train_group = None
             test_group = None
-        train_data = lgb.Dataset(train_file, group=train_group)
-        test_data = lgb.Dataset(test_file, reference=train_data, group=test_group)
+        if "cat_converters" in params:
+            cat_converters = params["cat_converters"]
+        else:
+            cat_converters = "raw"
+        train_data = lgb.Dataset(train_file, group=train_group, cat_converters=cat_converters)
+        test_data = lgb.Dataset(test_file, reference=train_data, group=test_group, cat_converters=cat_converters)
         eval_results = {}
         self.fullfill_parameters(params, seed)
         print("eval with params " + str(params))

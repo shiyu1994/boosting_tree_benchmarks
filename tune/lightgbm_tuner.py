@@ -7,7 +7,7 @@ import sys
 
 class LightGBMTuner(Tuner):
     def __init__(self, train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir, task,\
-            max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, train_query_fname=None, test_query_fname=None):
+            max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, cat_type, train_query_fname=None, test_query_fname=None):
         super().__init__(train_fname, test_fname, feat_types_fname, work_dir, task,\
             max_evals, n_cv_folds, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
         print("using LightGBM in " + str(lgb.__file__))
@@ -17,6 +17,7 @@ class LightGBMTuner(Tuner):
             self.objective = self.task
         self.num_threads = num_threads
         self.num_trees = num_trees
+        self.cat_type = cat_type
         param_dict = {
             'learning_rate': hp.loguniform('learning_rate', -7, 0),
             'num_leaves' : hp.qloguniform('num_leaves', 1, 7, 1),
@@ -38,10 +39,14 @@ class LightGBMTuner(Tuner):
                     cat_count = int(cat_count)
                     if cat_count > max_cat_count:
                         max_cat_count = cat_count
-            param_dict["cat_smooth"] = hp.qloguniform('cat_smooth', 0, 8, 1)
-            param_dict["cat_l2"] = hp.qloguniform('cat_l2', 0, 6, 1)
-            param_dict["max_cat_threshold"] = hp.randint('max_cat_threshold', max_cat_count // 2) + 1
-            param_dict["cat_converters"] = "ctr,count,raw"
+            if self.cat_type == "old":
+                param_dict["cat_smooth"] = hp.qloguniform('cat_smooth', 0, 8, 1)
+                param_dict["cat_l2"] = hp.qloguniform('cat_l2', 0, 6, 1)
+                param_dict["max_cat_threshold"] = hp.randint('max_cat_threshold', max_cat_count // 2) + 1
+            elif self.cat_type == "new":
+                param_dict["cat_converters"] = hp.choice("ctr_method", ["ctr,count", "ctr"])
+                param_dict["prior_weight"] = hp.qloguniform('prior_weight', 0, 8, 1)
+                param_dict["num_ctr_folds"] = hp.randint('num_ctr_folds', 12) + 3
         self.param_space = param_dict
         self.metric = None
 
@@ -84,6 +89,8 @@ class LightGBMTuner(Tuner):
             cat_converters = params["cat_converters"]
         else:
             cat_converters = "raw"
+        print("train_file = ", train_file)
+        print("test_file = ", test_file)
         train_data = lgb.Dataset(train_file, group=train_group, cat_converters=cat_converters)
         test_data = lgb.Dataset(test_file, reference=train_data, group=test_group, cat_converters=cat_converters)
         eval_results = {}
@@ -102,9 +109,9 @@ class LightGBMTuner(Tuner):
         return lgb_booster, results
 
 if __name__ == "__main__":
-    if len(sys.argv) != 12 and len(sys.argv) != 14:
+    if len(sys.argv) != 13 and len(sys.argv) != 15:
         print("usage: python lightgbm_tuner.py <train_fname> <test_fname> <feat_types_fname> <cat_count_fname>"
-            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname> [train_query_fname test_query_fname]")
+            "<work_dir> <task> <max_evals> <n_cv_folds> <num_trees> <num_threads> <time_log_fname> <cat_type> [train_query_fname test_query_fname]")
         exit(0)
     train_fname = sys.argv[1]
     test_fname = sys.argv[2]
@@ -117,11 +124,13 @@ if __name__ == "__main__":
     num_trees = int(sys.argv[9])
     num_threads = int(sys.argv[10])
     time_log_fname = sys.argv[11]
-    if len(sys.argv) == 12:
-        lgb_tuner = LightGBMTuner(train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir, task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname)
+    cat_type = sys.argv[12]
+    if len(sys.argv) == 13:
+        lgb_tuner = LightGBMTuner(train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir,\
+            task, max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, cat_type)
     else:
-        train_query_fname = sys.argv[12]
-        test_query_fname = sys.argv[13]
+        train_query_fname = sys.argv[13]
+        test_query_fname = sys.argv[14]
         lgb_tuner = LightGBMTuner(train_fname, test_fname, feat_types_fname, cat_count_fname, work_dir, task,\
-            max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
+            max_evals, n_cv_folds, num_trees, num_threads, time_log_fname, cat_type, train_query_fname=train_query_fname, test_query_fname=test_query_fname)
     lgb_tuner.run()

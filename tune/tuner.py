@@ -19,7 +19,7 @@ class Tuner:
         self.n_cv_folds = n_cv_folds
         self.n_rseed = 5
         self.n_seed = 5
-        self.time_lim = 17280
+        self.time_lim = 1000000000000000
         self.early_stopping_rounds = 50
         self.is_first_log = True
         self.time_log_fname = time_log_fname

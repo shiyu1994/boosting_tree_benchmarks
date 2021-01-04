@@ -35,7 +35,7 @@ def gen(start_data_idx, end_data_idx):
                 for arch in archs:
                     arch_str = "_".join(arch.split(","))
                     for seed in range(3):
-                        line = "python -u {0}.py {1}.train.csv.norm.remap {1}.test.csv.norm.remap {1}.cd {1}.count {2} {3} {8} {4} {5} {0}_{6}_{7}.log {9}\n".format(
+                        line = "python -u {0}.py {1}.train.csv.norm.remap {1}.test.csv.norm.remap {1}.cd {1}.count {2} {3} {8} {4} {5} {0}_{6}_{7}_{9}.log {9}\n".format(
                             mode,
                             data_path,
                             num_threads,

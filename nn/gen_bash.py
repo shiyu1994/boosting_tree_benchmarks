@@ -34,20 +34,20 @@ def gen(start_data_idx, end_data_idx):
             for mode in modes:
                 for arch in archs:
                     arch_str = "_".join(arch.split(","))
-                    for seed in range(3)
-                    line = "python -u {0}.py {1}.train.csv.norm.remap {1}.test.csv.norm.remap {1}.cd {1}.train.csv.norm.count {2} {3} {8} {4} {5} {0}_{6}_{7}.log {9}\n".format(
-                        mode,
-                        data_path,
-                        num_threads,
-                        batch_size,
-                        num_features,
-                        arch,
-                        data_name,
-                        arch_str,
-                        num_epochs,
-                        seed
-                    )
-                    out_file.write(line)
+                    for seed in range(3):
+                        line = "python -u {0}.py {1}.train.csv.norm.remap {1}.test.csv.norm.remap {1}.cd {1}.count {2} {3} {8} {4} {5} {0}_{6}_{7}.log {9}\n".format(
+                            mode,
+                            data_path,
+                            num_threads,
+                            batch_size,
+                            num_features,
+                            arch,
+                            data_name,
+                            arch_str,
+                            num_epochs,
+                            seed
+                        )
+                        out_file.write(line)
     os.system("chmod +x {0}".format(out_fname))
 
 if __name__ == "__main__":

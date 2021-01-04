@@ -7,7 +7,9 @@ import sklearn
 import sys
 
 class DNN:
-    def __init__(self, train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_epochs, num_features, layer_units, log_fname):
+    def __init__(self, train_fname, test_fname, feature_type_fname, cat_count_fname,\
+        num_threads, batch_size, num_epochs, num_features, layer_units, log_fname, seed):
+        tf.random.set_seed(seed)
         self.train_fname = train_fname
         self.test_fname = test_fname
         self.cat_feature = set()
@@ -86,8 +88,9 @@ class DNN:
             self.log_history(history_callback.history)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 11:
-        print("usage: python deepfm.py <train_fname> <test_fname> <feature_type_fname> <cat_count_fname> <num_threads> <batch_size> <num_epochs> <num_features> <layer_units> <log_fname>")
+    if len(sys.argv) != 12:
+        print("usage: python deepfm.py <train_fname> <test_fname> <feature_type_fname> <cat_count_fname>\
+            <num_threads> <batch_size> <num_epochs> <num_features> <layer_units> <log_fname> <seed>")
         exit(0)
     train_fname = sys.argv[1]
     test_fname = sys.argv[2]
@@ -99,5 +102,7 @@ if __name__ == "__main__":
     num_features = int(sys.argv[8])
     layer_units = sys.argv[9]
     log_fname = sys.argv[10]
-    dnn = DNN(train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_epochs, num_features, layer_units, log_fname)
+    seed = int(sys.argv[11])
+    dnn = DNN(train_fname, test_fname, feature_type_fname, cat_count_fname,\
+        num_threads, batch_size, num_epochs, num_features, layer_units, log_fname, seed)
     dnn.train()

@@ -1,8 +1,10 @@
 from dnn import *
 
 class DeepFM(DNN):
-    def __init__(self, train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_epochs, num_features, layer_units, log_fname):
-        super().__init__(train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_epochs, num_features, layer_units, log_fname)
+    def __init__(self, train_fname, test_fname, feature_type_fname, cat_count_fname,\
+        num_threads, batch_size, num_epochs, num_features, layer_units, log_fname, seed):
+        super().__init__(train_fname, test_fname, feature_type_fname, cat_count_fname,\
+            num_threads, batch_size, num_epochs, num_features, layer_units, log_fname, seed)
 
     def _model_func(self):
         inputs = {}
@@ -29,8 +31,9 @@ class DeepFM(DNN):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 11:
-        print("usage: python deepfm.py <train_fname> <test_fname> <feature_type_fname> <cat_count_fname> <num_threads> <batch_size> <num_epochs> <num_features> <layer_units> <log_fname>")
+    if len(sys.argv) != 12:
+        print("usage: python deepfm.py <train_fname> <test_fname> <feature_type_fname>\
+            <cat_count_fname> <num_threads> <batch_size> <num_epochs> <num_features> <layer_units> <log_fname> <seed>")
         exit(0)
     train_fname = sys.argv[1]
     test_fname = sys.argv[2]
@@ -42,5 +45,7 @@ if __name__ == "__main__":
     num_features = int(sys.argv[8])
     layer_units = sys.argv[9]
     log_fname = sys.argv[10]
-    deepfm = DeepFM(train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads, batch_size, num_epochs, num_features, layer_units, log_fname)
+    seed = int(sys.argv[11])
+    deepfm = DeepFM(train_fname, test_fname, feature_type_fname, cat_count_fname, num_threads,\
+        batch_size, num_epochs, num_features, layer_units, log_fname, seed)
     deepfm.train()

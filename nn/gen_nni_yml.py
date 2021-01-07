@@ -35,7 +35,7 @@ def gen(start_data_idx, end_data_idx):
                     yml_file.write("authorName: Yu Shi\n"
                                    "experimentName: deepfm\n"
                                    "trialConcurrency: 8\n"
-                                   "maxExecDuration: 24h\n"
+                                   "maxExecDuration: 6h\n"
                                    "maxTrialNum: 200\n"
                                    "trainingServicePlatform: local\n"
                                    "# The path to Search Space\n"

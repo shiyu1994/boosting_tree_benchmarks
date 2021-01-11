@@ -26,7 +26,7 @@ class DeepFM(DNN):
             embedding_1 = embeddings[cat_feature_indices[i]]
             for j in range(i + 1, len(cat_feature_indices)):
                 embedding_2 = embeddings[cat_feature_indices[j]]
-            fm += tf.reduce_sum(embedding_1 * embedding_2)
+                fm += tf.reduce_sum(embedding_1 * embedding_2)
         raw_score = layers.Dense(1, name="output")(fcn + fm)
         output = tf.sigmoid(raw_score)
         return keras.Model(inputs, output)

@@ -60,7 +60,12 @@ class DNN:
             fcn = layers.Dense(unit, activation="relu")(fcn)
             fcn = layers.BatchNormalization()(fcn)
         raw_score = layers.Dense(1, name="output")(fcn)
-        output = tf.sigmoid(raw_score)
+        if objective == "binary":
+            output = tf.sigmoid(raw_score)
+        elif objective == "regression":
+            output = raw_score
+        else:
+            raise Exception
         return keras.Model(inputs, output)
 
     def _input_func(self, fname, train_or_test):

@@ -28,7 +28,12 @@ class DeepFM(DNN):
                 embedding_2 = embeddings[cat_feature_indices[j]]
                 fm += tf.reduce_sum(embedding_1 * embedding_2)
         raw_score = layers.Dense(1, name="output")(fcn + fm)
-        output = tf.sigmoid(raw_score)
+        if objective == "binary":
+            output = tf.sigmoid(raw_score)
+        elif objective == "regression":
+            output = raw_score
+        else:
+            raise Exception
         return keras.Model(inputs, output)
 
 def run_trial(params, train_fname, test_fname, feature_type_fname, cat_count_fname, num_features, objective):

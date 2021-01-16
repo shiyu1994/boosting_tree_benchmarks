@@ -1,0 +1,10 @@
+{
+    "num_threads": {"_type": "choice", "_value": [16]},
+    "num_epochs": {"_type": "choice", "_value": [20]},
+    "early_stopping_rounds": {"_type": "choice", "_value": [3]},
+    "n_seed": {"_type": "choice", "_value": [5]},
+    "batch_size": {"_type": "choice", "_value": [256, 512, 1024]},
+    "layer_units": {"_type": "choice", "_value": ["20,20,10", "50,50,25", "100,100,50", "100,100,100,50"]},
+    "log_learning_rate": {"_type": "uniform", "_value": [-5, -1]},
+    "embed_dim": {"_type": "choice", "_value": [5]}
+}

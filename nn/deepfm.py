@@ -16,7 +16,7 @@ class DeepFM(DNN):
         for feature_index in self.cat_feature:
             embeddings[feature_index] = layers.Flatten()(layers.Embedding(self.cat_count[feature_index], self.embed_dim)(inputs[str(feature_index)]))
         dense_input = layers.Concatenate()(numeric_values + list(embeddings.values()))
-        fcn = layers.BatchNormalization()(dense_input)
+        fcn = dense_input
         for unit in self.layer_units:
             fcn = layers.Dense(unit, activation="relu")(fcn)
             fcn = layers.BatchNormalization()(fcn)

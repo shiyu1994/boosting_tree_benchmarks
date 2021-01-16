@@ -55,7 +55,7 @@ class DNN:
         embeddings = [layers.Flatten()(layers.Embedding(self.cat_count[feature_index], self.embed_dim)(inputs[str(feature_index)]))\
             for feature_index in self.cat_feature]
         dense_input = layers.Concatenate()(numeric_values + embeddings)
-        fcn = layers.BatchNormalization()(dense_input)
+        fcn = dense_input
         for unit in self.layer_units:
             fcn = layers.Dense(unit, activation="relu")(fcn)
             fcn = layers.BatchNormalization()(fcn)

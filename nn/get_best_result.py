@@ -59,14 +59,15 @@ def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
         #assert len(start_order) == len(param_list)
         param_dict = dict(zip(start_order, param_list))
     assert len(finish_order) == len(best_loss_list)
-    best_i, best_loss, search_time_to_best = -1, np.nan, None
+    best_i, best_loss, search_time_to_best = -1, np.inf, None
     for i, (dt, loss) in enumerate(best_loss_list):
         search_time_to_best = dt - start_time
         time = search_time_to_best.total_seconds()
-        if time <= time_lim_in_hours * 3600:
+        if time <= time_lim_in_hours * 3600 and loss < best_loss:
             best_i = i
             best_loss = loss
             search_time_to_best = dt - start_time
+        else:
             break
     best_trial_id = finish_order[best_i]
     best_param = param_dict[best_trial_id]
@@ -98,6 +99,7 @@ def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
         all_res += [res]
     mean = np.mean(all_res)
     stdvar = np.std(all_res)
+    print(mean, best_loss)
     if best_loss < 0.0:
         assert np.abs(mean - np.abs(best_loss)) <= 1e-6
     else:

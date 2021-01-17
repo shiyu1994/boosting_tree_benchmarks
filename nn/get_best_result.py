@@ -58,8 +58,6 @@ def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
             if line.find("status changed from RUNNING to SUCCEEDED") != -1:
                 trial_id = parse_trial_id(line)
                 finish_order += [trial_id]
-        #print(len(start_order), len(param_list))
-        #assert len(start_order) == len(param_list)
         param_dict = dict(zip(start_order, param_list))
     assert len(finish_order) == len(best_loss_list)
     best_i, best_loss, search_time_to_best = -1, np.inf, None
@@ -85,10 +83,10 @@ def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
         )
     elif mode == "deepfm":
         fname_prefix = "{4}_deepfm_bs{0}_arch{1}_lr{2}_ed{3}".format(
-            params["batch_size"],
-            "_".join(params["layer_units"].split(",")),
+            best_param["batch_size"],
+            "_".join(best_param["layer_units"].split(",")),
             learning_rate,
-            params["embed_dim"],
+            best_param["embed_dim"],
             data_name
         )
     all_res = []
@@ -102,7 +100,6 @@ def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
         all_res += [res]
     mean = np.mean(all_res)
     stdvar = np.std(all_res)
-    print(mean, best_loss)
     if best_loss < 0.0:
         assert np.abs(mean - np.abs(best_loss)) <= 1e-6
     else:

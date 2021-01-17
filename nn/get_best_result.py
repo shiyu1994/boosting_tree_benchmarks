@@ -29,6 +29,7 @@ def parse_trial_id(line):
     return id_str
 
 def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
+    time_lim_in_seconds = time_lim_in_hours * 3600
     dispatcher_path = nni_dir + job_id + "/log/dispatcher.log"
     nnimanager_path = nni_dir + job_id + "/log/nnimanager.log"
     mode, data_name = json.load(open(nni_dir + job_id + "/.config", "r"))["experimentConfig"]["experimentName"].split("_")
@@ -63,11 +64,11 @@ def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
     for i, (dt, loss) in enumerate(best_loss_list):
         search_time_to_best = dt - start_time
         time = search_time_to_best.total_seconds()
-        if time <= time_lim_in_hours * 3600 and loss < best_loss:
+        if time <= time_lim_in_seconds and loss < best_loss:
             best_i = i
             best_loss = loss
             search_time_to_best = dt - start_time
-        else:
+        elif time > time_lim_in_seconds:
             break
     best_trial_id = finish_order[best_i]
     best_param = param_dict[best_trial_id]

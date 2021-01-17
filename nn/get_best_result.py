@@ -32,7 +32,9 @@ def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
     time_lim_in_seconds = time_lim_in_hours * 3600
     dispatcher_path = nni_dir + job_id + "/log/dispatcher.log"
     nnimanager_path = nni_dir + job_id + "/log/nnimanager.log"
-    mode, data_name = json.load(open(nni_dir + job_id + "/.config", "r"))["experimentConfig"]["experimentName"].split("_")
+    elements = json.load(open(nni_dir + job_id + "/.config", "r"))["experimentConfig"]["experimentName"].split("_")
+    mode = elements[0]
+    data_name = "_".join(elements[1:])
     with open(dispatcher_path, "r") as dispatcher_file:
         first_line = next(dispatcher_file)
         start_time = parse_datetime(first_line)

@@ -62,8 +62,8 @@ def get_best_result(job_id, time_lim_in_hours, n_seed, min_max):
     assert len(finish_order) == len(best_loss_list)
     best_i, best_loss, search_time_to_best = -1, np.inf, None
     for i, (dt, loss) in enumerate(best_loss_list):
-        search_time_to_best = dt - start_time
-        time = search_time_to_best.total_seconds()
+        search_time = dt - start_time
+        time = search_time.total_seconds()
         if time <= time_lim_in_seconds and loss < best_loss:
             best_i = i
             best_loss = loss

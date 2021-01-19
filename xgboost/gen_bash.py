@@ -35,7 +35,7 @@ def gen(start_data_idx, end_data_idx):
             data_path = data_dir + "/" + data
             data_name = data.split("/")[-1]
             if obj == "ranking":
-                obj = "rank:ndcg"
+                obj = "rank:pairwise"
                 metric_is = "eval_metric=ndcg@1 eval_metric=ndcg@3 eval_metric=ndcg@5 eval_metric=ndcg@10"
             elif obj == "binary":
                 obj = "binary:logistic"

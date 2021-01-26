@@ -1,7 +1,7 @@
 import os
 import sys
 
-def gen(start_data_idx, end_data_idx):
+def gen(start_data_idx, end_data_idx, cat_type):
     data_list = [
         ("higgs", "binary"),
         ("yahoo", "ranking"),
@@ -22,7 +22,7 @@ def gen(start_data_idx, end_data_idx):
     data_list = data_list[start_data_idx: end_data_idx]
 
     data_dir = "../../data"
-    n_trials = 200
+    n_trials = 500
     n_cv_folds = 5
     n_iterations = 1000
     n_threads = 16
@@ -33,14 +33,14 @@ def gen(start_data_idx, end_data_idx):
         data_path = data_dir + "/" + data
         data_name = data.split("/")[-1]
         if obj == "ranking":
-            line = ("python -u ../lightgbm_tuner.py {0}.train {0}.test {0}.cd {0}.count tmp {1} {2} {3} {4} {5} {6}.log "
+            line = ("python -u ../lightgbm_tuner.py {0}.train {0}.test {0}.cd {0}.count tmp {1} {2} {3} {4} {5} {6}.log {7}"
                 "{0}.train.query {0}.test.query > {6}_tune.log\n").format(
-                data_path, obj, n_trials, n_cv_folds, n_iterations, n_threads, data_name
+                data_path, obj, n_trials, n_cv_folds, n_iterations, n_threads, data_name, cat_type
             )
             lines += [line]
         else:
-            line = ("python -u ../lightgbm_tuner.py {0}.train {0}.test {0}.cd {0}.count tmp {1} {2} {3} {4} {5} {6}.log > {6}_tune.log\n").format(
-                data_path, obj, n_trials, n_cv_folds, n_iterations, n_threads, data_name
+            line = ("python -u ../lightgbm_tuner.py {0}.train {0}.test {0}.cd {0}.count tmp {1} {2} {3} {4} {5} {6}.log {7} > {6}_tune.log\n").format(
+                data_path, obj, n_trials, n_cv_folds, n_iterations, n_threads, data_name, cat_type
             )
             lines += [line]
 
@@ -50,4 +50,5 @@ def gen(start_data_idx, end_data_idx):
     os.system("chmod +x {}".format(bash_file_name))
 
 if __name__ == "__main__":
-    gen(int(sys.argv[1]), int(sys.argv[2]))
+    cat_type = sys.argv[3]
+    gen(int(sys.argv[1]), int(sys.argv[2]), cat_type)

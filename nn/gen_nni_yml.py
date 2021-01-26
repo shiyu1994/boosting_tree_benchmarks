@@ -6,7 +6,7 @@ def gen(start_data_idx, end_data_idx):
         ("higgs", "binary", ["dnn"], 28, "params_large_num"),
         ("yahoo", "regression", ["dnn"], 700, "params_large_num"),
         ("msltr", "regression", ["dnn"], 137, "params_large_num"),
-        ("dataexpo", "binary", ["dnn", "deepfm"], 700, "params_large_cat"),
+        ("dataexpo", "binary", ["dnn", "deepfm"], 8, "params_large_cat"),
         ("allstate", "binary", ["dnn"], 30, "params_large_cat"),
         ("adult", "binary", ["dnn", "deepfm"], 14, "params_small_cat"),
         ("amazon", "binary", ["dnn", "deepfm"], 9, "params_small_cat"),
